@@ -34,7 +34,7 @@ __For using it automatically on Sidekiq start add this line to your Sidekiq init
 ```ruby
  Sidekiq.configure_server do |config|
     # Some code for your Sidekiq setup
-    Sidekiq::UniqueJobs::StartupCleaner.clean_unique_digests
+    SidekiqUniqueDigestsCleaner.clean_unique_digests
   end
 ```
 
