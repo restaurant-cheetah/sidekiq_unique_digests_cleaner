@@ -19,8 +19,10 @@ class SidekiqUniqueDigestsCleaner
       Sidekiq::ScheduledSet.new.map(&:value),
       Sidekiq::RetrySet.new.map(&:value),
       Sidekiq::Queue.all.map { |queue| queue.map(&:value) },
-      Sidekiq::Workers.new.map { |_pid, _tid, job| job.value },
     ].flatten.map { |job_value| JSON.parse(job_value, symbolize_names: true)[:unique_digest] }
+
+    digests_with_lock += Sidekiq::Workers.new.map { |_pid, _tid, job| job['unique_digest'] }
+
     SidekiqUniqueJobs::Digests.all - digests_with_lock
   end
 end
