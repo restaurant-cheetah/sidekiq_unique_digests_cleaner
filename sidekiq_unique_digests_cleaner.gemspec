@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require File.expand_path('../lib/version', __FILE__)
+
 Gem::Specification.new do |s|
   s.name        = 'sidekiq_unique_digests_cleaner'
-  s.version     = '1.0.1'
+  s.version     = VERSION
+  s.platform    = Gem::Platform::RUBY
   s.licenses    = ['MIT']
   s.summary     = 'Tool for cleaning unique digests which were stuck because of SIGKILL or any other accident.'
   s.authors     = ["Max Honcharov"]
