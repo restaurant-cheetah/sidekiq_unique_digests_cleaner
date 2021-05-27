@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class SidekiqUniqueDigestsCleaner
-  def self.clean_unique_digests
+  def self.clean_unique_digests(exclude_queues: [])
     Sidekiq.logger.info('######## Starting cleaning up locked unique digests...')
-    digests = stuck_digests
+    digests = stuck_digests(exclude_queues)
     if digests.any?
       Sidekiq.logger.info('######## Looks like those digests are stuck: ' + digests.join(', '))
       Sidekiq.logger.info('######## Unlocking digests...')
@@ -14,11 +14,12 @@ class SidekiqUniqueDigestsCleaner
     end
   end
 
-  def self.stuck_digests
+  def self.stuck_digests(exclude_queues)
     digests_with_lock = [
       Sidekiq::ScheduledSet.new.map(&:value),
       Sidekiq::RetrySet.new.map(&:value),
-      Sidekiq::Queue.all.map { |queue| queue.map(&:value) },
+      Sidekiq::Queue.all.filter { |queue| !exclude_queues.include?(queue.name) }
+                        .map { |queue| queue.map(&:value) }
     ].flatten.map { |job_value| JSON.parse(job_value, symbolize_names: true)[:unique_digest] }
 
     digests_with_lock += Sidekiq::Workers.new.map { |_pid, _tid, job| job['unique_digest'] }
