@@ -7,10 +7,10 @@ class SidekiqUniqueDigestsCleaner
     if digests.any?
       Sidekiq.logger.info("######## Looks like those digests are stuck: #{digests.join(', ')}")
       Sidekiq.logger.info('######## Unlocking digests...')
-      digests.map { |digest| SidekiqUniqueJobs::Digests.del(digest: digest) }
+      digests.map { |digest| SidekiqUniqueJobs::Digests.new.delete_by_digest(digest) }
       Sidekiq.logger.info('######## Unlocked!')
     else
-      Sidekiq.logger.info('######## What is the nice day! Nothing to unlock.')
+      Sidekiq.logger.info('######## Beautiful day! Nothing to unlock.')
     end
   end
 
@@ -23,6 +23,6 @@ class SidekiqUniqueDigestsCleaner
 
     digests_with_lock += Sidekiq::Workers.new.map { |_pid, _tid, job| job['unique_digest'] }
 
-    SidekiqUniqueJobs::Digests.all - digests_with_lock
+    SidekiqUniqueJobs::Digests.new.entries.keys - digests_with_lock
   end
 end
